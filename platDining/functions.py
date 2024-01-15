@@ -93,7 +93,7 @@ def coordinates(x) -> str:
             telephoneNumber = x['businessData']['phone']
 
             ddgs = DDGS()
-            ddg_map = ddgs.maps(x['name'], place=city, max_results=1)
+            ddg_map = ddgs.maps(x['name'], place=city, postalcode=postcode, max_results=1)
             ddg_result = list(ddg_map)
             if len(ddg_result) > 0:
                 return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
