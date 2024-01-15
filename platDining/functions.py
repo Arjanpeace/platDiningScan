@@ -5,6 +5,7 @@ import json
 # import geopandas as gpd
 import pandas as pd
 from geopy.geocoders import Nominatim
+from duckduckgo_search import DDGS
 
 
 def getCountries(main_url: str) -> pd.DataFrame:
@@ -89,6 +90,21 @@ def coordinates(x) -> str:
             city = x['city']['title']
             postcode = x['translations_x']['en']['postcode']
             address = address.split(',')
+            telephoneNumber = x['businessData']['phone']
+
+            ddgs = DDGS()
+            ddg_map = ddgs.maps(x['name'], place=city, max_results=1)
+            ddg_result = list(ddg_map)
+            if len(ddg_result) > 0:
+                return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
+
+            if telephoneNumber == '':
+                ddg_map = ddgs.maps(address, place=city, postalcode=postcode, max_results=1)
+            else:
+                ddg_map = ddgs.maps(telephoneNumber, place=city, postalcode=postcode, max_results=1)
+            ddg_result = list(ddg_map)
+            if len(ddg_result) > 0:
+                return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
 
             if len(address) == 1:
                 search_loc = str(address[0]) + ', ' + str(postcode) + ', ' + city
@@ -117,5 +133,6 @@ def coordinates(x) -> str:
             if location == None:
                 print(x['name'], 'no_location_found')
                 return 'no_location_found'
+
             else:
-                return str(location.latitude) + ', ' +str(location.longitude)
+                return str(location.latitude) + ', ' + str(location.longitude)

@@ -1,11 +1,12 @@
 # System Packages
 from platDining.functions import *
-
+import time
 
 if __name__ == "__main__":
     #
     # file_path = sys.argv[0]
     # base variables
+    start = time.time()
     main_url = "https://dining-offers-prod.amex.r53.tuimedia.com/api/countries"
     country_url = 'https://dining-offers-prod.amex.r53.tuimedia.com/api/country/{0}/merchants'
 
@@ -29,5 +30,8 @@ if __name__ == "__main__":
 
     # Output the file
     data.to_csv('output/map.csv', index=False)
+    
+    print(time.time() - start)
+
 
 
