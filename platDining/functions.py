@@ -5,6 +5,7 @@ import requests
 from duckduckgo_search import DDGS
 from folium import plugins
 from geopy.geocoders import Nominatim
+from time import gmtime, strftime
 
 
 def getCountries(main_url: str):
@@ -146,11 +147,20 @@ def coordinates(merchant):
 
 def createMap(merchants):
     html = """
-   <a href="{1}" target="_blank">{0}</a> 
+        <p style="text-align: center;">
+       <a href="{1}" target="_blank">{0}</a> 
+       <br>
+       <br>
+       Cuisine: {2}  
+       </p>
     """
 
-    m = folium.Map(location=[48.864716, 2.349014], zoom_start=3,
-                   control_scale=True)
+    current_date = strftime("%Y-%m-%d", gmtime())
+
+    m = folium.Map(location=[48.864716, 2.349014],
+                   zoom_start=3,
+                   control_scale=True,
+                   attr=f"Latest Update on {current_date} by SuveBoom")
 
     plugins.Geocoder().add_to(m)
     plugins.MiniMap(toggle_display=True).add_to(m)
@@ -163,11 +173,14 @@ def createMap(merchants):
             name = merchant['name']
             cuisine = merchant['cuisine']['translations']['en']['title']
             coordi = coordi.split(',')
-            folium.Marker(location=[coordi[0],
-                                    coordi[1]
-                                    ],
+            iframe = folium.IFrame(html.format(name, website, cuisine))
+            len_frame = max(len(name)*10, 150)
+            popup = folium.Popup(iframe,  min_width=len_frame, max_width=len_frame)
+            folium.Marker(location = [coordi[0],
+                                      coordi[1]
+                                      ],
                           tags=[cuisine],
-                          popup=html.format(name, website)).add_to(m)
+                          popup=popup).add_to(m)
             cuisines.append(cuisine)
 
     cuisines = list(set(cuisines))
@@ -177,3 +190,5 @@ def createMap(merchants):
     ).add_to(m)
 
     m.save("index.html")
+
+
