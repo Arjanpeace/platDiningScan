@@ -1,138 +1,179 @@
-import requests
 import json
-# import folium
-# from folium.plugins import MarkerCluster
-# import geopandas as gpd
-import pandas as pd
-from geopy.geocoders import Nominatim
+
+import folium
+import requests
 from duckduckgo_search import DDGS
+from folium import plugins
+from geopy.geocoders import Nominatim
 
 
-def getCountries(main_url: str) -> pd.DataFrame:
-    """
-
-    :param main_url:
-    :return:
-    """
-
+def getCountries(main_url: str):
     page = requests.get(main_url)
-    countries = json.loads(page.text)
-    countries = pd.DataFrame(countries)
-    countries = countries.explode('countries')
-    countries.reset_index(drop=True,
-                          inplace=True)
-    countries_ = pd.DataFrame(countries['countries'].values.tolist())
+    raw_countries = json.loads(page.text)
 
-    return pd.concat([countries, countries_], axis=1)
+    countries = {}
+    for continent in raw_countries:
+        for country in continent['countries']:
+            country['continent_title'] = continent['title']
+            country['continent_translations'] = continent['translations']
+            countries[country['key']] = country
+
+    return countries
 
 
-def getMerchants(country_url: str, countryList: list) -> pd.DataFrame:
-    """
+def getMerchants(country_url: str, countries):
+    merchants = {}
 
-    :param country_url:
-    :param countryList:
-    :return:
-    """
-
-    data = pd.DataFrame()
-    for country in countryList:
+    for country in countries.keys():
         data_url = country_url.format(country)
         page = requests.get(data_url)
-        y = json.loads(page.text)
-        country_data = pd.DataFrame(y)
-        country_data['country'] = country
-        data = pd.concat([data, country_data])
+        raw_merchants = json.loads(page.text)
+        for merchant in raw_merchants:
+            merchant['country'] = countries[country]
+            if merchant['onlineOnly'] == True:
+                merchant['coordinates'] = 'onlineOnly'
+            merchants[merchant['id']] = merchant
 
-    return data.reset_index(drop=True)
-
-
-def merchantGroupDivider(data: pd.DataFrame) -> pd.DataFrame:
-    """
-
-    :param data:
-    :return:
-    """
-    for MerchantGroupIndex in data[data['isMerchantGroup'] == True].index:
-        MerchantGroup: object = data.loc[MerchantGroupIndex, 'merchants']
-        new_df = pd.DataFrame(MerchantGroup)
-        new_df['country'] = data.loc[MerchantGroupIndex, 'country']
-        if len(new_df) > 0:
-            data = pd.concat([data, new_df])
-        else:
-            print(MerchantGroupIndex)
-
-    return data.reset_index(drop=True)
+    return merchants
 
 
-def coordinates(x) -> str:
-    """
+def merchantGroupDivider(merchants):
+    merchants_groups = {}
 
-    :param x:
-    :return:
-    """
-    geolocator = Nominatim(user_agent="AmexDining", timeout=5)
+    for merchant_id in merchants.keys():
+        if merchants[merchant_id]['isMerchantGroup'] == True:
+            merchants_group = merchants[merchant_id]['merchants']
+            for merchant in merchants_group:
+                merchants_groups[merchant['id']] = merchant
+            merchants[merchant_id]['coordinates'] = 'MerchantGroup'
 
-    if len(x['merchants']) > 0 or len(str(x['merchants'])) > 4:
-        return 'MerchantGroup'
-    elif x['onlineOnly'] == True:
-        return 'online_only'
-    elif '/@' in x['googleMapsUrl']:
-        values = x['googleMapsUrl'].split('/@')[1].split(',')
+    return merchants_groups
+
+
+def googleMapsUrl(googleMapsUrl):
+    values = googleMapsUrl.split('/@')[1].split(',')
+    return str(values[0]) + ', ' + str(values[1])
+
+
+def googleMapsUrlRequest(googleMapsUrl):
+    page = requests.get(googleMapsUrl)
+    if '/@' in page.text:
+        values = page.text.split('/@')[1].split(',')
         return str(values[0]) + ', ' + str(values[1])
     else:
-        url = x['googleMapsUrl']
-        page = requests.get(url)
-        if '/@' in page.text:
-            values = page.text.split('/@')[1].split(',')
-            return str(values[0]) + ', ' + str(values[1])
+        return 'nothing found'
+
+
+def businessData(merchant):
+    address = merchant['translations']['en']['address']
+    city = merchant['city']['translations']['en']['title']
+    postcode = merchant['translations']['en']['postcode']
+    telephoneNumber = merchant['businessData']['phone']
+    return address, city, postcode, telephoneNumber
+
+
+def duckDuckSearch(name, city, postcode, telephoneNumber, address):
+    ddgs = DDGS()
+    ddg_map = ddgs.maps(name, place=city, postalcode=postcode, max_results=1)
+
+    ddg_result = list(ddg_map)
+    if len(ddg_result) > 0:
+        return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
+
+    if telephoneNumber == '':
+        ddg_map = ddgs.maps(address, place=city, postalcode=postcode, max_results=1)
+    else:
+        ddg_map = ddgs.maps(telephoneNumber, place=city, postalcode=postcode, max_results=1)
+
+    ddg_result = list(ddg_map)
+    if len(ddg_result) > 0:
+        return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
+
+    else:
+        return 'nothing found'
+
+
+def openStreetMapSearch(name, address, city, postcode):
+    geolocator = Nominatim(user_agent="AmexDining", timeout=5)
+    address = address.split(',')
+    if len(address) == 1:
+        search_loc = str(address[0]) + ', ' + str(postcode) + ', ' + city
+    else:
+        search_loc = str(address[-2]) + ', ' + str(address[-1]) + ', ' + str(postcode) + ', ' + city
+
+    location = geolocator.geocode(search_loc)
+
+    if location == None:
+        if '/' in search_loc:
+            search_loc = search_loc.split('/')[1]
+            location = geolocator.geocode(search_loc)
+        elif 'floor' in search_loc.lower():
+            search_loc = search_loc.lower().split('floor')[1]
+            location = geolocator.geocode(search_loc)
         else:
-            address = x['translations_x']['en']['address']
-            city = x['city']['title']
-            postcode = x['translations_x']['en']['postcode']
-            address = address.split(',')
-            telephoneNumber = x['businessData']['phone']
-
-            ddgs = DDGS()
-            ddg_map = ddgs.maps(x['name'], place=city, postalcode=postcode, max_results=1)
-            ddg_result = list(ddg_map)
-            if len(ddg_result) > 0:
-                return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
-
-            if telephoneNumber == '':
-                ddg_map = ddgs.maps(address, place=city, postalcode=postcode, max_results=1)
-            else:
-                ddg_map = ddgs.maps(telephoneNumber, place=city, postalcode=postcode, max_results=1)
-            ddg_result = list(ddg_map)
-            if len(ddg_result) > 0:
-                return str(ddg_result[0]['latitude']) + ', ' + str(ddg_result[0]['longitude'])
-
             if len(address) == 1:
-                search_loc = str(address[0]) + ', ' + str(postcode) + ', ' + city
+                search_loc = str(address[0]) + ', ' + str(postcode)
             else:
-                search_loc = str(address[-2]) + ', ' + str(address[-1]) + ', ' + str(postcode) + ', ' + city
-
+                search_loc = str(address[-2]) + ', ' + str(address[-1]) + ', ' + str(postcode)
             location = geolocator.geocode(search_loc)
+    if location == None:
+        search_loc = str(address[-1]) + ', ' + str(postcode) + ', ' + city
+        location = geolocator.geocode(search_loc)
+    if location == None:
+        print(name, 'no_location_found')
+        return 'no_location_found'
+    else:
+        return str(location.latitude) + ', ' + str(location.longitude)
 
-            if location == None:
-                if '/' in search_loc:
-                    search_loc = search_loc.split('/')[1]
-                elif 'floor' in search_loc.lower():
-                    search_loc = search_loc.lower().split('floor')[1]
-                else:
-                    if len(address) == 1:
-                        search_loc = str(address[0]) + ', ' + str(postcode)
-                    else:
-                        search_loc = str(address[-2]) + ', ' + str(address[-1]) + ', ' + str(postcode)
 
-            location = geolocator.geocode(search_loc)
+def coordinates(merchant):
+    if '/@' in merchant['googleMapsUrl']:
+        return googleMapsUrl(merchant['googleMapsUrl'])
 
-            if location == None:
-                search_loc = str(address[-1]) + ', ' + str(postcode) + ', ' + city
-                location = geolocator.geocode(search_loc)
+    googleMapsUrlRequestOutput = googleMapsUrlRequest(merchant['googleMapsUrl'])
+    if googleMapsUrlRequestOutput != 'nothing found':
+        return googleMapsUrlRequestOutput
 
-            if location == None:
-                print(x['name'], 'no_location_found')
-                return 'no_location_found'
+    address, city, postcode, telephoneNumber = businessData(merchant)
+    name = merchant['name']
+    duckDuckSearchOutput = duckDuckSearch(name, city, postcode, telephoneNumber, address)
 
-            else:
-                return str(location.latitude) + ', ' + str(location.longitude)
+    if duckDuckSearchOutput != 'nothing found':
+        return duckDuckSearchOutput
+    else:
+        return openStreetMapSearch(name, address, city, postcode)
+
+
+def createMap(merchants):
+    html = """
+   <a href="{1}" target="_blank">{0}</a> 
+    """
+
+    m = folium.Map(location=[48.864716, 2.349014], zoom_start=3,
+                   control_scale=True)
+
+    plugins.Geocoder().add_to(m)
+    plugins.MiniMap(toggle_display=True).add_to(m)
+
+    cuisines = []
+    for key, merchant in merchants.items():
+        coordi = merchant['coordinates']
+        if ',' in str(coordi):
+            website = merchant['businessData']['website']
+            name = merchant['name']
+            cuisine = merchant['cuisine']['translations']['en']['title']
+            coordi = coordi.split(',')
+            folium.Marker(location=[coordi[0],
+                                    coordi[1]
+                                    ],
+                          tags=[cuisine],
+                          popup=html.format(name, website)).add_to(m)
+            cuisines.append(cuisine)
+
+    cuisines = list(set(cuisines))
+    plugins.TagFilterButton(
+        data=cuisines,
+        clear_text='Remove Filter'
+    ).add_to(m)
+
+    m.save("output/PlatDining.html")
