@@ -31,7 +31,7 @@ if __name__ == "__main__":
     createMap(merchants)
 
     # Output the file
-    with open("output/PlatDining.json", "w") as outfile:
-        outfile.write(merchants)
+    with open('output/PlatDining.json', 'w') as fp:
+        json.dump(merchants, fp)
 
     print(time.time() - start)
