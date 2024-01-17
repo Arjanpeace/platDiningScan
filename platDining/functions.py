@@ -201,6 +201,7 @@ def createMap(merchants):
         
           gtag('config', 'G-LMLZ7ZT66Z');
         </script>
+        <link rel="shortcut icon" type="image/png" href="images/icons8-vizsla-64.png">
 
         """
 
