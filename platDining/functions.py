@@ -176,4 +176,4 @@ def createMap(merchants):
         clear_text='Remove Filter'
     ).add_to(m)
 
-    m.save("output/index.html")
+    m.save("index.html")
