@@ -5,7 +5,7 @@ import requests
 from duckduckgo_search import DDGS
 from folium import plugins
 from geopy.geocoders import Nominatim
-from time import gmtime, strftime
+from time import gmtime, strftime, sleep
 
 
 def getCountries(main_url: str):
@@ -75,6 +75,7 @@ def businessData(merchant):
 
 def duckDuckSearch(name, city, postcode, telephoneNumber, address):
     ddgs = DDGS()
+    sleep(1)
     ddg_map = ddgs.maps(name, place=city, postalcode=postcode, max_results=1)
 
     ddg_result = list(ddg_map)
@@ -145,50 +146,7 @@ def coordinates(merchant):
         return openStreetMapSearch(name, address, city, postcode)
 
 
-def createMap(merchants):
-    html = """
-        <p style="text-align: center;">
-       <a href="{1}" target="_blank">{0}</a> 
-       <br>
-       <br>
-       Cuisine: {2}  
-       </p>
-    """
-
-    current_date = strftime("%Y-%m-%d", gmtime())
-
-    m = folium.Map(location=[48.864716, 2.349014],
-                   zoom_start=3,
-                   control_scale=True,
-                   attr=f"Latest Update on {current_date} by SuveBoom")
-
-    plugins.Geocoder().add_to(m)
-    plugins.MiniMap(toggle_display=True).add_to(m)
-
-    cuisines = []
-    for key, merchant in merchants.items():
-        coordi = merchant['coordinates']
-        if ',' in str(coordi):
-            website = merchant['businessData']['website']
-            name = merchant['name']
-            cuisine = merchant['cuisine']['translations']['en']['title']
-            coordi = coordi.split(',')
-            iframe = folium.IFrame(html.format(name, website, cuisine))
-            len_frame = max(len(name)*10, 150)
-            popup = folium.Popup(iframe,  min_width=len_frame, max_width=len_frame)
-            folium.Marker(location = [coordi[0],
-                                      coordi[1]
-                                      ],
-                          tags=[cuisine],
-                          popup=popup).add_to(m)
-            cuisines.append(cuisine)
-
-    cuisines = list(set(cuisines))
-    plugins.TagFilterButton(
-        data=cuisines,
-        clear_text='Remove Filter'
-    ).add_to(m)
-
+def addGoogleTag(m):
     google_tag_head = """
         <head> 
         
@@ -206,8 +164,59 @@ def createMap(merchants):
         """
 
 
-    m = m.get_root().render().replace('<head>', google_tag_head)
+    return m.get_root().render().replace('<head>', google_tag_head)
 
+
+def createInitialMap():
+    current_date = strftime("%Y-%m-%d", gmtime())
+    m = folium.Map(location=[48.864716, 2.349014],
+                   zoom_start=3,
+                   control_scale=True,
+                   attr=f"Latest Update on {current_date} by SuveBoom")
+
+    plugins.Geocoder().add_to(m)
+    plugins.MiniMap(toggle_display=True).add_to(m)
+
+    return m
+
+
+def createMap(merchants):
+    iframeHtml = """
+        <p style="text-align: center;">
+       <a href="{1}" target="_blank">{0}</a> 
+       <br>
+       <br>
+       Cuisine: {2}  
+       </p>
+    """
+
+    m = createInitialMap()
+
+    cuisines = []
+    for key, merchant in merchants.items():
+        coordi = merchant['coordinates']
+        if ',' in str(coordi):
+            website = merchant['businessData']['website']
+            name = merchant['name']
+            cuisine = merchant['cuisine']['translations']['en']['title']
+            coordi = coordi.split(',')
+            iframe = folium.IFrame(iframeHtml.format(name, website, cuisine))
+            len_frame = max(len(name)*10, 150)
+            popup = folium.Popup(iframe,  min_width=len_frame, max_width=len_frame)
+            folium.Marker(location=[coordi[0],
+                                    coordi[1]
+                                    ],
+                          tags=[cuisine],
+                          popup=popup).add_to(m)
+            cuisines.append(cuisine)
+
+    cuisines = list(set(cuisines))
+    plugins.TagFilterButton(
+        data=cuisines,
+        clear_text='Remove Filter'
+    ).add_to(m)
+
+    m = addGoogleTag(m)
     text_file = open("index.html", "w")
     text_file.write(m)
     text_file.close()

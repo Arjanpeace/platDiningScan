@@ -19,13 +19,17 @@ if __name__ == "__main__":
     # Make full dataset
     merchants.update(merchants_groups)
 
+    a = 0
     # Try to determine coordinates
     for merchant_id in merchants.keys():
+        a += 1
         merchant = merchants[merchant_id]
         if 'coordinates' in merchant.keys():
             pass
         else:
             merchants[merchant_id]['coordinates'] = coordinates(merchant)
+        if a % 111 == 0:
+            print(f'{(a/len(merchants.keys())) * 100}% done')
 
     # Output the map
     createMap(merchants)
