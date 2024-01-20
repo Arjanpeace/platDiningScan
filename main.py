@@ -19,23 +19,45 @@ if __name__ == "__main__":
     # Make full dataset
     merchants.update(merchants_groups)
 
-    a = 0
-    # Try to determine coordinates
-    for merchant_id in merchants.keys():
-        a += 1
-        merchant = merchants[merchant_id]
-        if 'coordinates' in merchant.keys():
-            pass
-        else:
-            merchants[merchant_id]['coordinates'] = coordinates(merchant)
-        if a % 111 == 0:
-            print(f'{(a/len(merchants.keys())) * 100}% done')
+    with open('output/platDining.json', 'r') as f:
+        old_merchants = json.load(f)
+
+    # Make get new additions
+    new_merchants = {}
+    for key in merchants.keys():
+        if key not in old_merchants.keys():
+            new_merchants[key] = merchants[key]
+
+    if len(new_merchants.keys()) > 0:
+        a = 0
+        # Try to determine coordinates
+        for merchant_id in new_merchants.keys():
+            a += 1
+            merchant = new_merchants[merchant_id]
+            if 'coordinates' in merchant.keys():
+                pass
+            else:
+                new_merchants[merchant_id]['coordinates'] = coordinates(merchant)
+            if a % 111 == 0:
+                print(f'{(a/len(new_merchants.keys())) * 100}% done')
+
+        # Make full dataset
+        old_merchants.update(new_merchants)
 
     # Output the map
-    createMap(merchants)
+    createMap(old_merchants)
 
     # Output the file
     with open('output/PlatDining.json', 'w') as fp:
-        json.dump(merchants, fp)
+        json.dump(old_merchants, fp)
+
+    missing = {}
+    for key, item in old_merchants.items():
+        if item['coordinates'] == 'no_location_found':
+            missing[key] = item
+
+    # Output the missing file
+    with open('output/PlatDiningMissingCoordinates.json', 'w') as fp:
+        json.dump(missing, fp)
 
     print(time.time() - start)

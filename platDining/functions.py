@@ -74,8 +74,8 @@ def businessData(merchant):
 
 
 def duckDuckSearch(name, city, postcode, telephoneNumber, address):
-    ddgs = DDGS()
-    sleep(1)
+    ddgs = DDGS(timeout=20)
+    sleep(10)
     ddg_map = ddgs.maps(name, place=city, postalcode=postcode, max_results=1)
 
     ddg_result = list(ddg_map)
