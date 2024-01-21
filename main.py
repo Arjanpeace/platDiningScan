@@ -6,27 +6,8 @@ from platDining.functions import *
 if __name__ == "__main__":
     # base variables
     start = time.time()
-    main_url = "https://dining-offers-prod.amex.r53.tuimedia.com/api/countries"
-    country_url = 'https://dining-offers-prod.amex.r53.tuimedia.com/api/country/{0}/merchants'
-
-    # Get all countries
-    countries = getCountries(main_url)
-
-    # Get all different merchants
-    merchants = getMerchants(country_url, countries)
-    merchants_groups = merchantGroupDivider(merchants)
-
-    # Make full dataset
-    merchants.update(merchants_groups)
-
-    with open('output/platDining.json', 'r') as f:
-        old_merchants = json.load(f)
-
-    # Make get new additions
-    new_merchants = {}
-    for key in merchants.keys():
-        if key not in old_merchants.keys():
-            new_merchants[key] = merchants[key]
+    merchants = getLatestData()
+    new_merchants, old_merchants = gettingListOfNewMerchants(merchants)
 
     if len(new_merchants.keys()) > 0:
         a = 0

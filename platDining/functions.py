@@ -1,4 +1,5 @@
 import json
+from typing import Tuple, Dict, Any
 
 import folium
 import requests
@@ -8,7 +9,7 @@ from geopy.geocoders import Nominatim
 from time import gmtime, strftime, sleep
 
 
-def getCountries(main_url: str):
+def getCountries(main_url: str) -> dict:
     page = requests.get(main_url)
     raw_countries = json.loads(page.text)
 
@@ -22,7 +23,7 @@ def getCountries(main_url: str):
     return countries
 
 
-def getMerchants(country_url: str, countries):
+def getMerchants(country_url: str, countries: dict) -> dict:
     merchants = {}
 
     for country in countries.keys():
@@ -38,7 +39,7 @@ def getMerchants(country_url: str, countries):
     return merchants
 
 
-def merchantGroupDivider(merchants):
+def merchantGroupDivider(merchants: dict) -> tuple[dict, dict]:
     merchants_groups = {}
 
     for merchant_id in merchants.keys():
@@ -48,15 +49,55 @@ def merchantGroupDivider(merchants):
                 merchants_groups[merchant['id']] = merchant
             merchants[merchant_id]['coordinates'] = 'MerchantGroup'
 
-    return merchants_groups
+    return merchants_groups, merchants
 
 
-def googleMapsUrl(googleMapsUrl):
+def getLatestData():
+    main_url = "https://dining-offers-prod.amex.r53.tuimedia.com/api/countries"
+    country_url = 'https://dining-offers-prod.amex.r53.tuimedia.com/api/country/{0}/merchants'
+
+    # Get all countries
+    countries = getCountries(main_url)
+
+    # Get all different merchants
+    merchants = getMerchants(country_url, countries)
+    merchants_groups, merchants = merchantGroupDivider(merchants)
+
+    # Make full dataset
+    merchants.update(merchants_groups)
+
+    return merchants
+
+
+def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
+    with open('output/platDining.json', 'r') as f:
+        old_merchants = json.load(f)
+
+    # Make get new additions
+    new_merchants = {}
+    for key in merchants.keys():
+        if key not in old_merchants.keys():
+            new_merchants[key] = merchants[key]
+
+    # Make list of removed Apps
+    removed_merchants = {}
+    for key in old_merchants.keys():
+        if key not in merchants.keys():
+            removed_merchants[key] = old_merchants[key]
+
+    # Output the removed file
+    with open('output/RemovedMerchants.json', 'w') as fp:
+        json.dump(removed_merchants, fp)
+
+    return new_merchants, old_merchants
+
+
+def googleMapsUrl(googleMapsUrl: str) -> str:
     values = googleMapsUrl.split('/@')[1].split(',')
     return str(values[0]) + ', ' + str(values[1])
 
 
-def googleMapsUrlRequest(googleMapsUrl):
+def googleMapsUrlRequest(googleMapsUrl: str) -> str:
     page = requests.get(googleMapsUrl)
     if '/@' in page.text:
         values = page.text.split('/@')[1].split(',')
@@ -65,7 +106,7 @@ def googleMapsUrlRequest(googleMapsUrl):
         return 'nothing found'
 
 
-def businessData(merchant):
+def businessData(merchant: dict) -> tuple[str, str, str, str]:
     address = merchant['translations']['en']['address']
     city = merchant['city']['translations']['en']['title']
     postcode = merchant['translations']['en']['postcode']
@@ -73,7 +114,7 @@ def businessData(merchant):
     return address, city, postcode, telephoneNumber
 
 
-def duckDuckSearch(name, city, postcode, telephoneNumber, address):
+def duckDuckSearch(name: str, city: str, postcode: str, telephoneNumber: str, address: str) -> str:
     ddgs = DDGS(timeout=20)
     sleep(10)
     ddg_map = ddgs.maps(name, place=city, postalcode=postcode, max_results=1)
@@ -95,7 +136,7 @@ def duckDuckSearch(name, city, postcode, telephoneNumber, address):
         return 'nothing found'
 
 
-def openStreetMapSearch(name, address, city, postcode):
+def openStreetMapSearch(name: str, address: str, city: str, postcode: str) -> str:
     geolocator = Nominatim(user_agent="AmexDining", timeout=5)
     address = address.split(',')
     if len(address) == 1:
@@ -128,7 +169,7 @@ def openStreetMapSearch(name, address, city, postcode):
         return str(location.latitude) + ', ' + str(location.longitude)
 
 
-def coordinates(merchant):
+def coordinates(merchant: dict) -> str:
     if '/@' in merchant['googleMapsUrl']:
         return googleMapsUrl(merchant['googleMapsUrl'])
 
@@ -146,7 +187,7 @@ def coordinates(merchant):
         return openStreetMapSearch(name, address, city, postcode)
 
 
-def addGoogleTag(m):
+def addGoogleTag(m: folium.folium.Map) -> str:
     google_tag_head = """
         <head> 
         
@@ -163,11 +204,10 @@ def addGoogleTag(m):
 
         """
 
-
     return m.get_root().render().replace('<head>', google_tag_head)
 
 
-def createInitialMap():
+def createInitialMap() -> folium.folium.Map:
     current_date = strftime("%Y-%m-%d", gmtime())
     m = folium.Map(location=[48.864716, 2.349014],
                    zoom_start=3,
@@ -180,7 +220,7 @@ def createInitialMap():
     return m
 
 
-def createMap(merchants):
+def createMap(merchants: dict):
     iframeHtml = """
         <p style="text-align: center;">
        <a href="{1}" target="_blank">{0}</a> 
