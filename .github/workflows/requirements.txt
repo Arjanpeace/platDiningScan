@@ -1,5 +1,0 @@
-requests
-json
-folium
-duckduckgo_search
-geopy
