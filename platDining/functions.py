@@ -1,6 +1,4 @@
 import json
-from typing import Tuple, Dict, Any
-
 import folium
 import requests
 from duckduckgo_search import DDGS
@@ -233,6 +231,7 @@ def createMap(merchants: dict):
     m = createInitialMap()
 
     cuisines = []
+    restaurants = []
     for key, merchant in merchants.items():
         coordi = merchant['coordinates']
         if ',' in str(coordi):
@@ -241,19 +240,27 @@ def createMap(merchants: dict):
             cuisine = merchant['cuisine']['translations']['en']['title']
             coordi = coordi.split(',')
             iframe = folium.IFrame(iframeHtml.format(name, website, cuisine))
-            len_frame = max(len(name)*10, 150)
+            len_frame = max(len(name)*10, 250)
             popup = folium.Popup(iframe,  min_width=len_frame, max_width=len_frame)
-            folium.Marker(location=[coordi[0],
+            folium.Marker(location=[
+                                    coordi[0],
                                     coordi[1]
                                     ],
-                          tags=[cuisine],
+                          tags=[cuisine, name],
                           popup=popup).add_to(m)
             cuisines.append(cuisine)
+            restaurants.append(name)
 
-    cuisines = list(set(cuisines))
+    cuisines = sorted(set(cuisines))
     plugins.TagFilterButton(
         data=cuisines,
-        clear_text='Remove Filter'
+        clear_text='Restaurant Cuisines'
+    ).add_to(m)
+
+    restaurants = sorted(set(restaurants))
+    plugins.TagFilterButton(
+        data=restaurants,
+        clear_text='Restaurant Names'
     ).add_to(m)
 
     m = addGoogleTag(m)
