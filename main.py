@@ -1,11 +1,13 @@
 # System Packages
 import time
+import os
 
 from platDining.functions import *
 
 if __name__ == "__main__":
     # base variables
     start = time.time()
+    current_working_directory = os.getcwd()
     merchants = getLatestData()
     new_merchants, old_merchants = gettingListOfNewMerchants(merchants)
 
@@ -38,7 +40,7 @@ if __name__ == "__main__":
             missing[key] = item
 
     # Output the missing file
-    with open('./output/PlatDiningMissingCoordinates.json', 'w') as fp:
+    with open(f'{current_working_directory}/output/PlatDiningMissingCoordinates.json', 'w') as fp:
         json.dump(missing, fp)
 
     print(time.time() - start)
