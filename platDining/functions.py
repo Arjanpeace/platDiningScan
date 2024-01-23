@@ -70,7 +70,6 @@ def getLatestData():
 
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
-    sys.path.insert(0, '.') 
     current_working_directory = os.getcwd()
     with open(f'{current_working_directory}/output/platDining.json', 'r') as f:
         old_merchants = json.load(f)
