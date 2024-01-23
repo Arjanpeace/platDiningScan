@@ -36,7 +36,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: execute py script 
-        run: python main.py
+        run: python ${{ env.DEVOPS_DIR }}/main.py
           
       - name: commit files
         run: |
