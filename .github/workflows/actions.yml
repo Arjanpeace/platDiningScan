@@ -24,11 +24,11 @@ jobs:
         with:
           python-version: '3.9' # install the python version needed
 
-      - name: Get list of files
-        run: |
-          cd output
-          ls
-          readlink -e ./PlatDining.json
+     # - name: Get list of files
+     ##   run: |
+      #    cd output
+      #    ls
+     #     readlink -e ./PlatDining.json
           
       - name: install python packages
         run: |
