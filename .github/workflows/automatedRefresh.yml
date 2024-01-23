@@ -32,7 +32,7 @@ jobs:
       - name: execute py script 
         run: python main.py
           
-      - name: commit files
+      - name: commit files back to repo
         run: |
           git config --global user.name 'SuveBoom'
           git config --global user.email 'arjanpeace@users.noreply.github.com'
