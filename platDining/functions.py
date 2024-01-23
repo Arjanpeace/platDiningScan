@@ -1,4 +1,5 @@
 import json
+import os
 import folium
 import requests
 from duckduckgo_search import DDGS
@@ -68,7 +69,8 @@ def getLatestData():
 
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
-    with open('./output/platDining.json', 'r') as f:
+    current_working_directory = os.getcwd()
+    with open(f'{current_working_directory}/output/platDining.json', 'r') as f:
         old_merchants = json.load(f)
 
     # Make get new additions
@@ -84,7 +86,7 @@ def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
             removed_merchants[key] = old_merchants[key]
 
     # Output the removed file
-    with open('./output/RemovedMerchants.json', 'w') as fp:
+    with open(f'{current_working_directory}/output/RemovedMerchants.json', 'w') as fp:
         json.dump(removed_merchants, fp)
 
     return new_merchants, old_merchants
@@ -219,6 +221,7 @@ def createInitialMap() -> folium.folium.Map:
 
 
 def createMap(merchants: dict):
+    current_working_directory = os.getcwd()
     iframeHtml = """
         <p style="text-align: center;">
        <a href="{1}" target="_blank">{0}</a> 
@@ -264,7 +267,7 @@ def createMap(merchants: dict):
     ).add_to(m)
 
     m = addGoogleTag(m)
-    text_file = open("./index.html", "w")
+    text_file = open(f'{current_working_directory}/index.html", "w")
     text_file.write(m)
     text_file.close()
 
