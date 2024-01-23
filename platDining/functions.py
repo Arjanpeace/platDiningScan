@@ -70,7 +70,7 @@ def getLatestData():
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
     current_working_directory = os.getcwd()
-    with open(f'{current_working_directory}/platDining.json', 'r') as f:
+    with open(f'{current_working_directory}/output/platDining.json', 'r') as f:
         old_merchants = json.load(f)
 
     # Make get new additions
@@ -86,7 +86,7 @@ def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
             removed_merchants[key] = old_merchants[key]
 
     # Output the removed file
-    with open(f'{current_working_directory}/RemovedMerchants.json', 'w') as fp:
+    with open(f'{current_working_directory}/output/RemovedMerchants.json', 'w') as fp:
         json.dump(removed_merchants, fp)
 
     return new_merchants, old_merchants
