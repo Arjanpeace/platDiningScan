@@ -9,7 +9,7 @@ from geopy.geocoders import Nominatim
 from time import gmtime, strftime, sleep
 
 
-def find(name: str) -> str:
+def findFile(name: str) -> str:
     current_working_directory = os.getcwd()
     for root, dirs, files in os.walk(current_working_directory):
         if name in files:
@@ -79,7 +79,8 @@ def getLatestData():
 
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
-    with open(find('platDining.json'), 'r') as f:
+    platDining = findFile('platDining.json')
+    with open(platDining, 'r') as f:
         old_merchants = json.load(f)
 
     # Make get new additions
@@ -95,7 +96,8 @@ def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
             removed_merchants[key] = old_merchants[key]
 
     # Output the removed file
-    with open(find('RemovedMerchants.json'), 'w') as fp:
+    RemovedMerchants = findFile('RemovedMerchants.json')
+    with open(RemovedMerchants, 'w') as fp:
         json.dump(removed_merchants, fp)
 
     return new_merchants, old_merchants
