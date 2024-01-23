@@ -11,6 +11,7 @@ from time import gmtime, strftime, sleep
 
 def findFile(name: str) -> str:
     current_working_directory = os.getcwd()
+    !! ls
     for root, dirs, files in os.walk(current_working_directory):
         if name in files:
             file = os.path.join(root, name)
