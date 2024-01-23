@@ -27,6 +27,7 @@ jobs:
 
       - name: Get list of files
         run: |
+          chmod -R 777 output
           cd output
           ls
           readlink -e ./PlatDining.json
