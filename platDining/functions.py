@@ -71,8 +71,8 @@ def getLatestData():
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
     current_working_directory = os.getcwd()
-    with open(f'{current_working_directory}/output/platDining.json', 'r') as f:
-        old_merchants = json.load(f)
+    url ='https://raw.githubusercontent.com/Arjanpeace/platDiningScan/main/output/PlatDining.json'
+    old_merchants = requests.get(url).json()
 
     # Make get new additions
     new_merchants = {}
