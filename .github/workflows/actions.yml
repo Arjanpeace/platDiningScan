@@ -28,6 +28,7 @@ jobs:
         run: |
           cd output
           ls
+          readlink -e ./PlatDining.json
           
       - name: install python packages
         run: |
