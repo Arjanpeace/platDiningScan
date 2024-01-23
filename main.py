@@ -29,7 +29,7 @@ if __name__ == "__main__":
     createMap(old_merchants)
 
     # Output the file
-    with open('output/PlatDining.json', 'w') as fp:
+    with open('./output/PlatDining.json', 'w') as fp:
         json.dump(old_merchants, fp)
 
     missing = {}
@@ -38,7 +38,7 @@ if __name__ == "__main__":
             missing[key] = item
 
     # Output the missing file
-    with open('output/PlatDiningMissingCoordinates.json', 'w') as fp:
+    with open('./output/PlatDiningMissingCoordinates.json', 'w') as fp:
         json.dump(missing, fp)
 
     print(time.time() - start)
