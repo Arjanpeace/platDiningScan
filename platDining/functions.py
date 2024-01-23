@@ -13,7 +13,9 @@ def find(name: str) -> str:
     current_working_directory = os.getcwd()
     for root, dirs, files in os.walk(current_working_directory):
         if name in files:
-            return os.path.join(root, name)
+            file = os.path.join(root, name)
+            print(file)
+            return file
 
 
 def getCountries(main_url: str) -> dict:
