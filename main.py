@@ -7,6 +7,7 @@ from platDining.functions import *
 if __name__ == "__main__":
     # base variables
     start = time.time()
+    print(os.system("ls -l"))
     current_working_directory = os.getcwd()
     merchants = getLatestData()
     new_merchants, old_merchants = gettingListOfNewMerchants(merchants)
