@@ -26,12 +26,8 @@ jobs:
 
       - name: Get list of files
         run: |
-          ls
-
-      - name: Get list of files v2
-        run: |
           cd output
-          readlink PlatDining.json
+          ls
           
       - name: install python packages
         run: |
@@ -39,7 +35,7 @@ jobs:
           pip install -r requirements.txt
           
       - name: execute py script 
-        working-directory: ./
+        uses: actions/checkout@v2
         run: python main.py
           
       - name: commit files
