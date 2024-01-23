@@ -68,7 +68,7 @@ def getLatestData():
 
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
-    with open('output/platDining.json', 'r') as f:
+    with open('./output/platDining.json', 'r') as f:
         old_merchants = json.load(f)
 
     # Make get new additions
@@ -84,7 +84,7 @@ def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
             removed_merchants[key] = old_merchants[key]
 
     # Output the removed file
-    with open('output/RemovedMerchants.json', 'w') as fp:
+    with open('./output/RemovedMerchants.json', 'w') as fp:
         json.dump(removed_merchants, fp)
 
     return new_merchants, old_merchants
@@ -264,7 +264,7 @@ def createMap(merchants: dict):
     ).add_to(m)
 
     m = addGoogleTag(m)
-    text_file = open("index.html", "w")
+    text_file = open("./index.html", "w")
     text_file.write(m)
     text_file.close()
 
