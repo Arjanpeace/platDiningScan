@@ -267,7 +267,7 @@ def createMap(merchants: dict):
     ).add_to(m)
 
     m = addGoogleTag(m)
-    text_file = open(f'{current_working_directory}/index.html", "w")
+    text_file = open(f'{current_working_directory}/index.html', "w")
     text_file.write(m)
     text_file.close()
 
