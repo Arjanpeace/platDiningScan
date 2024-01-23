@@ -31,7 +31,7 @@ if __name__ == "__main__":
     createMap(old_merchants)
 
     # Output the file
-    with open('./output/PlatDining.json', 'w') as fp:
+    with open(f'{current_working_directory}/output/PlatDining.json', 'w') as fp:
         json.dump(old_merchants, fp)
 
     missing = {}
