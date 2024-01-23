@@ -9,16 +9,6 @@ from geopy.geocoders import Nominatim
 from time import gmtime, strftime, sleep
 
 
-def findFile(name: str) -> str:
-    current_working_directory = os.getcwd()
-    os.system("ls -l")
-    for root, dirs, files in os.walk(current_working_directory):
-        if name in files:
-            file = os.path.join(root, name)
-            print(file)
-            return file
-
-
 def getCountries(main_url: str) -> dict:
     page = requests.get(main_url)
     raw_countries = json.loads(page.text)
@@ -80,8 +70,9 @@ def getLatestData():
 
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
-    platDining = findFile('platDining.json')
-    with open(platDining, 'r') as f:
+    sys.path.insert(0, '.') 
+    current_working_directory = os.getcwd()
+    with open(f'{current_working_directory}/output/platDining.json', 'r') as f:
         old_merchants = json.load(f)
 
     # Make get new additions
@@ -97,8 +88,7 @@ def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
             removed_merchants[key] = old_merchants[key]
 
     # Output the removed file
-    RemovedMerchants = findFile('RemovedMerchants.json')
-    with open(RemovedMerchants, 'w') as fp:
+    with open(f'{current_working_directory}/output/RemovedMerchants.json', 'w') as fp:
         json.dump(removed_merchants, fp)
 
     return new_merchants, old_merchants
