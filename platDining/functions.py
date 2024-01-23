@@ -210,7 +210,7 @@ def addGoogleTag(m: folium.folium.Map) -> str:
 def createInitialMap() -> folium.folium.Map:
     current_date = strftime("%Y-%m-%d", gmtime())
     m = folium.Map(location=[48.864716, 2.349014],
-                   zoom_start=3,
+                   zoom_start=4,
                    control_scale=True,
                    attr=f"Latest Update on {current_date} by SuveBoom")
 
