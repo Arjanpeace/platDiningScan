@@ -19,6 +19,11 @@ jobs:
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner
 
+      - name: Open Web Client Directory
+        working-directory: src/webclient
+        run: |
+          ls -la
+
       - name: setup python
         uses: actions/setup-python@v4
         with:
