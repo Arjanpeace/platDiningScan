@@ -27,6 +27,12 @@ jobs:
       - name: Get list of files
         run: |
           ls
+
+      - name: Get list of files v2
+        run: |
+          cd output
+          ls
+          
           
       - name: install python packages
         run: |
