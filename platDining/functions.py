@@ -224,12 +224,15 @@ def createInitialMap() -> folium.folium.Map:
 def createMap(merchants: dict):
     current_working_directory = os.getcwd()
     iframeHtml = """
-        <p style="text-align: center;">
-       <a href="{1}" target="_blank">{0}</a> 
-       <br>
-       <br>
-       Cuisine: {2}  
-       </p>
+            <p style="text-align: center;">
+            
+            <b>Restaurant:</b> 
+            <a href="{1}" target="_blank">{0}</a> 
+            <br>
+            
+            <br>
+            <b>Cuisine:</b> {2}  
+            </p>
     """
 
     m = createInitialMap()
@@ -243,15 +246,12 @@ def createMap(merchants: dict):
             name = merchant['name']
             cuisine = merchant['cuisine']['translations']['en']['title']
             coordi = coordi.split(',')
-            iframe = folium.IFrame(iframeHtml.format(name, website, cuisine))
-            len_frame = max(len(name)*10, 250)
-            popup = folium.Popup(iframe,  min_width=len_frame, max_width=len_frame)
             folium.Marker(location=[
                                     coordi[0],
                                     coordi[1]
                                     ],
                           tags=[cuisine, name],
-                          popup=popup).add_to(m)
+                          popup=iframeHtml.format(name, website, cuisine)).add_to(m)
             cuisines.append(cuisine)
             restaurants.append(name)
 
