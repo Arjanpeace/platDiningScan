@@ -37,6 +37,5 @@ jobs:
           git config --global user.name 'SuveBoom'
           git config --global user.email 'arjanpeace@users.noreply.github.com'
           git commit -am "Automated run"
-          git show
           git push
     
