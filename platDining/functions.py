@@ -208,29 +208,18 @@ def addGoogleTag(m: folium.folium.Map) -> str:
 
 
 def createInitialMap() -> folium.folium.Map:
+    donateLink = 'https://www.buymeacoffee.com/suveboom'
     current_date = strftime("%Y-%m-%d", gmtime())
     m = folium.Map(location=[48.864716, 2.349014],
                    zoom_start=4,
                    control_scale=True,
-                   attr=f'Latest Update on {current_date} by SuveBoom. Why not buy me a coffee?')
+                   attr=f'Latest Update on {current_date} by SuveBoom. \u003ca href=\"{donateLink}\"\u003e Why not buy me a coffee?')
 
     plugins.Geocoder().add_to(m)
     plugins.MiniMap(toggle_display=True).add_to(m)
 
     return m
     
-
-def addCoffeeDonate(m: str) -> str:
-    current_date = strftime("%Y-%m-%d", gmtime())
-    stringToReplace = f'"Latest Update on {current_date} by SuveBoom. Why not buy me a coffee?"'
-    donateLink = 'https://www.buymeacoffee.com/suveboom'
-    htmlString = f'<a href="{donateLink}" target="_blank">coffee</a>'
-    stringToReplaceCleaned = stringToReplace.replace('"',"'")
-    newString = stringToReplaceCleaned.replace('coffee', htmlString)
-    
-    return m.replace(stringToReplace, newString)
-    
-
 def createMap(merchants: dict):
     current_working_directory = os.getcwd()
     iframeHtml = """
@@ -278,7 +267,6 @@ def createMap(merchants: dict):
     ).add_to(m)
 
     m = addGoogleTag(m)
-    #m = addCoffeeDonate(m)
     text_file = open(f'{current_working_directory}/index.html', "w")
     text_file.write(m)
     text_file.close()
