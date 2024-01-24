@@ -212,7 +212,7 @@ def createInitialMap() -> folium.folium.Map:
     m = folium.Map(location=[48.864716, 2.349014],
                    zoom_start=4,
                    control_scale=True,
-                   attr=f"Latest Update on {current_date} by SuveBoom. Do you like this? Why not buy me a coffee?"")
+                   attr=f"Latest Update on {current_date} by SuveBoom. Why not buy me a coffee?"")
 
     plugins.Geocoder().add_to(m)
     plugins.MiniMap(toggle_display=True).add_to(m)
