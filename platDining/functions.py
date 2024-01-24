@@ -198,13 +198,8 @@ def addGoogleTag(m: folium.folium.Map) -> str:
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-        
           gtag('config', 'G-LMLZ7ZT66Z');
         </script>
-
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1573732478074318"
-             crossorigin="anonymous"></script>
-        
         <link rel="shortcut icon" type="image/png" href="images/icons8-vizsla-64.png">
 
         """
