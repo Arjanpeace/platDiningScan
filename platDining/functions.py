@@ -214,7 +214,7 @@ def addGoogleTag(m: folium.folium.Map) -> str:
             <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Thank me!" 
             style="height: 30px !important;width: 110px !important;" ></a>
         '''
-    title_html = f'<h4 style="position:absolute;z-index:1000;bottom:1vw;left:10vw"" >{map_footnote}</h4>'
+    title_html = f'<h4 style="position:absolute;left:10vw"" >{map_footnote}</h4>'
     m.get_root().html.add_child(folium.Element(title_html))
 
     return m.get_root().render().replace('<head>', google_tag_head)
