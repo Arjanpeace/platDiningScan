@@ -236,6 +236,8 @@ def createMap(merchants: dict):
 
     m = createInitialMap()
 
+    marker_cluster = plugins.MarkerCluster().add_to(m)
+
     cuisines = []
     restaurants = []
     for key, merchant in merchants.items():
@@ -250,7 +252,7 @@ def createMap(merchants: dict):
                                     coordi[1]
                                     ],
                           tags=[cuisine, name],
-                          popup=iframeHtml.format(name, website, cuisine)).add_to(m)
+                          popup=iframeHtml.format(name, website, cuisine)).add_to(marker_cluster)
             cuisines.append(cuisine)
             restaurants.append(name)
 
