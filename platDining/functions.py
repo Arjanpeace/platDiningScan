@@ -70,7 +70,7 @@ def getLatestData():
 
 def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
     current_working_directory = os.getcwd()
-    url ='https://raw.githubusercontent.com/Arjanpeace/platDiningScan/main/output/PlatDining.json'
+    url = 'https://raw.githubusercontent.com/Arjanpeace/platDiningScan/main/output/PlatDining.json'
     old_merchants = requests.get(url).json()
 
     # Make get new additions
@@ -209,12 +209,12 @@ def addGoogleTag(m: folium.folium.Map) -> str:
 
     current_date = strftime("%d %b, %Y", gmtime())
     map_footnote = f'''
-            <p style="text-align: center;">Updated on {current_date} by <i>SuveBoom</i>. 
+            <p style="text-align: center;">Updated on {current_date} by <i>SuveBoom Margit</i>. 
             <a href="https://www.buymeacoffee.com/suveboom" target="_blank">
             <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Thank me!" 
             style="height: 30px !important;width: 110px !important;" ></a>
         '''
-    title_html = f'<h4 style="position:absolute;z-index:1000;bottom:1vw;left:10vw"" >{map_footnote}</h4>'
+    title_html = f'<h4 style="position:absolute;z-index:1000;bottom:1vw;left:10vw">{map_footnote}</h4>'
     m.get_root().html.add_child(folium.Element(title_html))
 
     return m.get_root().render().replace('<head>', google_tag_head)
@@ -223,7 +223,9 @@ def addGoogleTag(m: folium.folium.Map) -> str:
 def createInitialMap() -> folium.folium.Map:
     m = folium.Map(location=[48.864716, 2.349014],
                    zoom_start=4,
-                   attributionControl=False)
+                   attributionControl=False,
+                   tiles=None)
+    folium.raster_layers.TileLayer(tiles='openstreetmap', name='CuisineMaps').add_to(m)
     plugins.Geocoder(collapsed=True).add_to(m)
     plugins.LocateControl(position="topright",
                           strings={
@@ -231,13 +233,16 @@ def createInitialMap() -> folium.folium.Map:
                               "popup": "Your position"
                           }
                           ).add_to(m)
+
+    """
     plugins.MiniMap(toggle_display=True,
                     position="topright",
                     minimized=True).add_to(m)
+    """
 
     return m
-    
-    
+
+
 def createMap(merchants: dict):
     current_working_directory = os.getcwd()
     iframeHtml = """
@@ -254,10 +259,17 @@ def createMap(merchants: dict):
 
     m = createInitialMap()
 
-    marker_cluster = plugins.MarkerCluster().add_to(m)
-
     cuisines = []
-    restaurants = []
+    for key, merchant in merchants.items():
+        coordi = merchant['coordinates']
+        if ',' in str(coordi):
+            cuisine = merchant['cuisine']['translations']['en']['title']
+            cuisines.append(cuisine)
+
+    cuisines = sorted(set(cuisines))
+    for cuisine in cuisines:
+        globals()[f'{cuisine}_clMap'] = plugins.MarkerCluster(name=cuisine).add_to(m)
+
     for key, merchant in merchants.items():
         coordi = merchant['coordinates']
         if ',' in str(coordi):
@@ -265,35 +277,17 @@ def createMap(merchants: dict):
             name = merchant['name']
             cuisine = merchant['cuisine']['translations']['en']['title']
             coordi = coordi.split(',')
-            folium.Marker(location=[
-                                    coordi[0],
-                                    coordi[1]
-                                    ],
-                          tags=[cuisine, name],
-                          popup=iframeHtml.format(name, website, cuisine)).add_to(marker_cluster)
-            cuisines.append(cuisine)
-            restaurants.append(name)
+            cf_marker = folium.Marker(location=[
+                coordi[0],
+                coordi[1]
+            ],
+                tags=[cuisine, name],
+                popup=iframeHtml.format(name, website, cuisine))
+            globals()[f'{cuisine}_clMap'].add_child(cf_marker)
 
-    cuisines = sorted(set(cuisines))
-    plugins.TagFilterButton(
-        data=cuisines,
-        clear_text='Cuisines'
-    ).add_to(m)
-
-    """
-    Filter out second filter for mobile app view
-
-    
-    restaurants = sorted(set(restaurants))
-    plugins.TagFilterButton(
-        data=restaurants,
-        clear_text='Names'
-    ).add_to(m)
-
-    """
+    folium.LayerControl(position="topleft", draggable=True).add_to(m)
 
     m = addGoogleTag(m)
     text_file = open(f'{current_working_directory}/index.html', "w")
     text_file.write(m)
     text_file.close()
-
