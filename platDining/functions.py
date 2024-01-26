@@ -258,13 +258,13 @@ def createMap(merchants: dict):
     cuisines = sorted(set(cuisines))
     plugins.TagFilterButton(
         data=cuisines,
-        clear_text='Restaurant Cuisines'
+        clear_text='Cuisines'
     ).add_to(m)
 
     restaurants = sorted(set(restaurants))
     plugins.TagFilterButton(
         data=restaurants,
-        clear_text='Restaurant Names'
+        clear_text='Names'
     ).add_to(m)
 
     plugins.LocateControl(position="bottomleft",
