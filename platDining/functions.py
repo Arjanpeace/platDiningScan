@@ -200,24 +200,35 @@ def addGoogleTag(m: folium.folium.Map) -> str:
           gtag('config', 'G-LMLZ7ZT66Z');
         </script>
         <link rel="shortcut icon" type="image/png" href="images/icons8-vizsla-64.png">
-
+        
         """
+
+    map_title = "Platinum Dining Map"
+    title_html = f'<h2 style="position:absolute;z-index:1000;left:10vw" ><em>{map_title}</em></h2>'
+    m.get_root().html.add_child(folium.Element(title_html))
+
+    current_date = strftime("%d %b, %Y", gmtime())
+    map_footnote = f'''
+            <p style="text-align: center;">Updated on {current_date} by <i>SuveBoom</i>. 
+            <a href="https://www.buymeacoffee.com/suveboom" target="_blank">
+            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Thank me!" 
+            style="height: 30px !important;width: 110px !important;" ></a>
+        '''
+    title_html = f'<h4 style="position:absolute;z-index:1000;bottom:1vw;left:10vw"" >{map_footnote}</h4>'
+    m.get_root().html.add_child(folium.Element(title_html))
 
     return m.get_root().render().replace('<head>', google_tag_head)
 
 
 def createInitialMap() -> folium.folium.Map:
-    donateLink = 'https://www.buymeacoffee.com/suveboom'
-    current_date = strftime("%Y-%m-%d", gmtime())
     m = folium.Map(location=[48.864716, 2.349014],
                    zoom_start=4,
-                   control_scale=True,
-                   attr=f'Latest Update on {current_date} by SuveBoom. \u003ca href=\"{donateLink}\"\u003e Why not buy me a coffee?')
-
+                   attributionControl=False)
     plugins.Geocoder(collapsed=True).add_to(m)
     plugins.MiniMap(toggle_display=True, minimized=True).add_to(m)
 
     return m
+    
     
 def createMap(merchants: dict):
     current_working_directory = os.getcwd()
