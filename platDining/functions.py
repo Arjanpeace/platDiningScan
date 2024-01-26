@@ -261,11 +261,17 @@ def createMap(merchants: dict):
         clear_text='Cuisines'
     ).add_to(m)
 
+    """
+    Filter out second filter for mobile app view
+
+    
     restaurants = sorted(set(restaurants))
     plugins.TagFilterButton(
         data=restaurants,
         clear_text='Names'
     ).add_to(m)
+
+    """
 
     plugins.LocateControl(position="bottomleft",
                           strings={
