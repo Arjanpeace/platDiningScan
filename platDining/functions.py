@@ -284,7 +284,7 @@ def createMap(merchants: dict):
 
     """
 
-    plugins.LocateControl(position="bottomleft",
+    plugins.LocateControl(position="topright",
                           strings={
                               "title": "See you current location",
                               "popup": "Your position"
