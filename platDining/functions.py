@@ -204,7 +204,7 @@ def addGoogleTag(m: folium.folium.Map) -> str:
         """
 
     map_title = "Platinum Dining Map"
-    title_html = f'<h2 style="position:absolute;z-index:1000;left:10vw" ><em>{map_title}</em></h2>'
+    title_html = f'<h2 style="position:absolute;z-index:1000;left:10vw" ><p style="text-align: center;"><em>{map_title}</em></h2>'
     m.get_root().html.add_child(folium.Element(title_html))
 
     current_date = strftime("%d %b, %Y", gmtime())
