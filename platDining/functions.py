@@ -215,7 +215,7 @@ def createInitialMap() -> folium.folium.Map:
                    attr=f'Latest Update on {current_date} by SuveBoom. \u003ca href=\"{donateLink}\"\u003e Why not buy me a coffee?')
 
     plugins.Geocoder(collapsed=True).add_to(m)
-    plugins.MiniMap(toggle_display=True, minimized=True).add_to(m)
+    plugins.MiniMap(minimized=True).add_to(m)
 
     return m
     
