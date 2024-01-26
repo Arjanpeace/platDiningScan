@@ -2,7 +2,6 @@ import json
 import os
 import folium
 import requests
-import sys
 from duckduckgo_search import DDGS
 from folium import plugins
 from geopy.geocoders import Nominatim
@@ -267,6 +266,13 @@ def createMap(merchants: dict):
         data=restaurants,
         clear_text='Restaurant Names'
     ).add_to(m)
+
+    plugins.LocateControl(position="bottomleft",
+                          strings={
+                              "title": "See you current location",
+                              "popup": "Your position"
+                          }
+                          ).add_to(m)
 
     m = addGoogleTag(m)
     text_file = open(f'{current_working_directory}/index.html', "w")
