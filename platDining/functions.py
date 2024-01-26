@@ -225,7 +225,15 @@ def createInitialMap() -> folium.folium.Map:
                    zoom_start=4,
                    attributionControl=False)
     plugins.Geocoder(collapsed=True).add_to(m)
-    plugins.MiniMap(toggle_display=True, minimized=True).add_to(m)
+    plugins.LocateControl(position="topright",
+                          strings={
+                              "title": "See you current location",
+                              "popup": "Your position"
+                          }
+                          ).add_to(m)
+    plugins.MiniMap(toggle_display=True,
+                    position="topright",
+                    minimized=True).add_to(m)
 
     return m
     
@@ -283,13 +291,6 @@ def createMap(merchants: dict):
     ).add_to(m)
 
     """
-
-    plugins.LocateControl(position="topright",
-                          strings={
-                              "title": "See you current location",
-                              "popup": "Your position"
-                          }
-                          ).add_to(m)
 
     m = addGoogleTag(m)
     text_file = open(f'{current_working_directory}/index.html', "w")
