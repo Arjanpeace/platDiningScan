@@ -11,6 +11,8 @@ if __name__ == "__main__":
     merchants = getLatestData()
     new_merchants, old_merchants = gettingListOfNewMerchants(merchants)
 
+    print(len(new_merchants), len(old_merchants))
+
     if len(new_merchants.keys()) > 0:
         a = 0
         # Try to determine coordinates
