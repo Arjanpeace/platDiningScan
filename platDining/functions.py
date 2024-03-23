@@ -85,6 +85,9 @@ def gettingListOfNewMerchants(merchants: dict) -> tuple[dict, dict]:
         if key not in merchants.keys():
             removed_merchants[key] = old_merchants[key]
 
+    for key in removed_merchants.keys():
+        old_merchants.pop(key)
+
     # Output the removed file
     with open(f'{current_working_directory}/output/RemovedMerchants.json', 'w') as fp:
         json.dump(removed_merchants, fp)
